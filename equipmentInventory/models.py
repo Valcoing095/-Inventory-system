@@ -36,7 +36,7 @@ class Sede(models.Model):
 
 class EmpresaSede(models.Model):
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
-    sede = models.ForeignKey(Sede, on_delete=models.CASCADE,null=True, blank=True)
+    sede = models.ForeignKey(Sede, on_delete=models.CASCADE,null=True)
 
     class Meta:
         unique_together = ('empresa', 'sede')
@@ -62,39 +62,22 @@ class Area(models.Model):
         return self.nombre
 
 
-# ===================================== #
-#      RELACIÓN N:M ENTRE ÁREA Y SEDE   #
-# ===================================== #
-
-class AreaSede(models.Model):
-    area = models.ForeignKey(Area, on_delete=models.CASCADE)
-    sede = models.ForeignKey(Sede, on_delete=models.CASCADE,null=True, blank=True)
-
-    class Meta:
-        unique_together = ('area', 'sede')
-        verbose_name = "Área - Sede"
-        verbose_name_plural = "Áreas - Sedes"
-
-    def __str__(self):
-        return f"{self.area.nombre} - {self.sede.nombre}"
-
-
 # ============================== #
 #       MODELO DEPARTAMENTO      #
 # ============================== #
 
 class Departamento(models.Model):
     nombre = models.CharField(max_length=100)
-    area_sede = models.ForeignKey(AreaSede, on_delete=models.CASCADE, null=True, blank=True)
+    # area = models.ForeignKey(Area, on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = "Departamento"
         verbose_name_plural = "Departamentos"
 
     def __str__(self):
-        return f"{self.nombre} - {self.area_sede.area.nombre} - {self.area_sede.sede.nombre}"
-
-
+        if self.area:
+            return f"{self.nombre} - {self.area.nombre}"
+        return self.nombre
 # ============================== #
 #         MODELO USUARIO         #
 # ============================== #
@@ -103,17 +86,15 @@ class Usuario(models.Model):
     nombre = models.CharField(max_length=100)
     cargo = models.CharField(max_length=100)
     correo = models.EmailField(unique=True)
-    username_ad = models.CharField(max_length=100, unique=True)  # Usuario en Active Directory
+    username_ad = models.CharField(max_length=100)  # Usuario en Active Directory
     departamento = models.ForeignKey(Departamento, on_delete=models.CASCADE)
-    sede = models.ForeignKey(Sede, on_delete=models.CASCADE,null=True, blank=True)  # Relación directa con la sede
-
+    sede = models.ForeignKey(Sede, on_delete=models.CASCADE, null=True)
     class Meta:
         verbose_name = "Usuario"
         verbose_name_plural = "Usuarios"
 
     def __str__(self):
-        return f"{self.nombre} ({self.username_ad}) - {self.sede.nombre}"
-
+        return f"{self.nombre} ({self.username_ad}) - {self.sede.nombre if self.sede else 'Sin sede'}"
 
 # ============================== #
 #         MODELO ESTADO          #

@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import Empresa, Sede, EmpresaSede, Area, AreaSede, Departamento, Usuario, Estado, Equipo, HistorialAsignaciones
-from .serializers import EmpresaSerializer, SedeSerializer, EmpresaSedeSerializer, AreaSerializer, AreaSedeSerializer, DepartamentoSerializer, UsuarioSerializer, EstadoSerializer, EquipoSerializer, HistorialAsignacionesSerializer
+from .models import Empresa, Sede, EmpresaSede, Area, Departamento, Usuario, Estado, Equipo, HistorialAsignaciones
+from .serializers import EmpresaSerializer, SedeSerializer, EmpresaSedeSerializer, AreaSerializer, DepartamentoSerializer, UsuarioSerializer, EstadoSerializer, EquipoSerializer, HistorialAsignacionesSerializer
 
 class EmpresaViewSet(viewsets.ModelViewSet):
     queryset = Empresa.objects.all()
@@ -18,16 +18,13 @@ class AreaViewSet(viewsets.ModelViewSet):
     queryset = Area.objects.all()
     serializer_class = AreaSerializer
 
-class AreaSedeViewSet(viewsets.ModelViewSet):
-    queryset = AreaSede.objects.all()
-    serializer_class = AreaSedeSerializer
 
 class DepartamentoViewSet(viewsets.ModelViewSet):
     queryset = Departamento.objects.all()
     serializer_class = DepartamentoSerializer
 
 class UsuarioViewSet(viewsets.ModelViewSet):
-    queryset = Usuario.objects.all()
+    queryset =Usuario.objects.all()
     serializer_class = UsuarioSerializer
 
 class EstadoViewSet(viewsets.ModelViewSet):
