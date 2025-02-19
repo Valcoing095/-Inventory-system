@@ -68,15 +68,12 @@ class Area(models.Model):
 
 class Departamento(models.Model):
     nombre = models.CharField(max_length=100)
-    # area = models.ForeignKey(Area, on_delete=models.CASCADE, null=True)
-
+    area = models.ForeignKey(Area, on_delete = models.CASCADE,null=True)
     class Meta:
         verbose_name = "Departamento"
         verbose_name_plural = "Departamentos"
 
     def __str__(self):
-        if self.area:
-            return f"{self.nombre} - {self.area.nombre}"
         return self.nombre
 # ============================== #
 #         MODELO USUARIO         #
@@ -88,13 +85,13 @@ class Usuario(models.Model):
     correo = models.EmailField(unique=True)
     username_ad = models.CharField(max_length=100)  # Usuario en Active Directory
     departamento = models.ForeignKey(Departamento, on_delete=models.CASCADE)
-    sede = models.ForeignKey(Sede, on_delete=models.CASCADE, null=True)
+    empresa_sede = models.ForeignKey(EmpresaSede, on_delete=models.CASCADE,null=True)
     class Meta:
         verbose_name = "Usuario"
         verbose_name_plural = "Usuarios"
 
     def __str__(self):
-        return f"{self.nombre} ({self.username_ad}) - {self.sede.nombre if self.sede else 'Sin sede'}"
+        return f"{self.nombre} ({self.username_ad}) "
 
 # ============================== #
 #         MODELO ESTADO          #
@@ -128,7 +125,6 @@ class Equipo(models.Model):
     procesador = models.CharField(max_length=100)
     disco_duro = models.CharField(max_length=100)
     ram = models.CharField(max_length=100)
-    serial_equipo = models.CharField(max_length=100, null=True, blank=True)
     proveedor = models.CharField(max_length=100, null=True, blank=True)
     costo_unitario = models.CharField(max_length=100, null=True, blank=True)
     usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)

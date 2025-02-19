@@ -12,9 +12,16 @@ class SedeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class EmpresaSedeSerializer(serializers.ModelSerializer):
+    empresa_nombre = serializers.CharField(source="empresa.nombre")
+    sede_nombre = serializers.CharField(source="sede.nombre")
     class Meta:
         model = EmpresaSede
-        fields = '__all__'
+        fields = ["id",
+            "empresa",
+            "empresa_nombre",
+            "sede",
+            "sede_nombre"
+        ]
 
 class AreaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,15 +37,26 @@ class DepartamentoSerializer(serializers.ModelSerializer):
 class UsuarioSerializer(serializers.ModelSerializer):
     departamento_nombre = serializers.CharField(source="departamento.nombre", read_only=True)
     area = serializers.CharField(source="departamento.area.nombre", read_only=True)
-    id_area = serializers.IntegerField(source="departamento.area.id", read_only=True)
-    sede_nombre = serializers.IntegerField(source="sede.nombre", read_only=True)
+    empresa_nombre=serializers.CharField(source="empresa_sede.empresa.nombre", read_only=True)
+    sede_nombre = serializers.CharField(source="empresa_sede.sede.nombre", read_only=True)
+
+    dominios= ["caminos.com.co","sanoysalvo.com.co","andinautos.com.co"]
+
+    # Para validar los campos django usa por defecto el validate_nombre del campo
+    def validate_correo(self,value):
+        # Validar si el correo es corporativo de grupo caminos
+         
+        dominio = value.split("@")[-1]  # Extrae el dominio del correo
+        if dominio not in self.dominios:
+            raise serializers.ValidationError(f"El correo debe pertenecer a: {', '.join(self.dominios)}")
+        return value
 
     class Meta:
         model = Usuario
         fields = [
             "id", "nombre", "cargo", "correo", "username_ad", 
-            "departamento","sede",  # Campo escribible
-            "departamento_nombre", "area", "id_area", "sede","sede_nombre"  # Campos de solo lectura
+            "departamento",  # Campo escribible
+            "departamento_nombre", "area","empresa_sede","empresa_nombre","sede_nombre"   # Campos de solo lectura
         ]
 class EstadoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -46,10 +64,23 @@ class EstadoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class EquipoSerializer(serializers.ModelSerializer):
-    
+    usuario_name = serializers.CharField(source="usuario.nombre",read_only=True)
+    sede_nombre = serializers.CharField(source="usuario.empresa_sede.sede.nombre")
+
+    # def get_empresa(self, obj):
+    #     """
+    #     Obtiene la empresa asociada a la sede del usuario.
+    #     Como la relación es Many-to-Many, tomamos la primera empresa de la sede.
+    #     """
+    #     # if obj.usuario and obj.usuario.sede:
+    #     #     empresa_sede = obj.usuario.sede.empresasede_set.first()  # Obtener la primera relación
+    #     #     return empresa_sede.empresa.nombre if empresa_sede else "Sin empresa"
+    #     # return "Sin asignar"  # Si el equipo no tiene usuario asignado
+
     class Meta:
         model = Equipo
-        fields = '__all__'
+        fields = ["serial","modelo","marca","tipo","usuario","usuario","usuario_name","sede_nombre"
+        ]
 
 class HistorialAsignacionesSerializer(serializers.ModelSerializer):
     class Meta:
