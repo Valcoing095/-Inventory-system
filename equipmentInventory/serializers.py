@@ -75,7 +75,7 @@ class EquipoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Equipo
-        fields = ["serial", "modelo", "marca", "tipo", "usuario", "usuario_name", "sede_nombre","empresa_nombre","contrato"]
+        fields = ["id","serial", "modelo", "marca", "tipo", "usuario", "usuario_name", "sede_nombre","empresa_nombre","contrato"]
 
     def get_usuario_name(self, obj):
         """
