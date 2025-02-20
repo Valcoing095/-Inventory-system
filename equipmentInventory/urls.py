@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import EmpresaViewSet, SedeViewSet, EmpresaSedeViewSet, AreaViewSet, DepartamentoViewSet, UsuarioViewSet, EstadoViewSet, EquipoViewSet, HistorialAsignacionesViewSet
+from .views import ContratoViewSet,EmpresaViewSet, SedeViewSet, EmpresaSedeViewSet, AreaViewSet, DepartamentoViewSet, UsuarioViewSet, EstadoViewSet, EquipoViewSet, HistorialAsignacionesViewSet
 
 # Configurar Router para los ViewSets
 router = DefaultRouter()
@@ -13,6 +13,7 @@ router.register(r"usuarios", UsuarioViewSet)
 router.register(r"estados", EstadoViewSet)
 router.register(r"equipos", EquipoViewSet)
 router.register(r"historial-asignaciones", HistorialAsignacionesViewSet)
+router.register(r"contrato", ContratoViewSet)
 
 urlpatterns = [
     path("api/", include(router.urls)),  # Rutas automáticas para los modelos

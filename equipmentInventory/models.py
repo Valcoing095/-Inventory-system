@@ -112,6 +112,21 @@ class Estado(models.Model):
     def __str__(self):
         return self.estado
 
+# ======================================== #
+#           Contrato Proveedor             #
+# ======================================== #
+class Contrato(models.Model):
+    proveedor = models.CharField(max_length=100)
+    num_contrato = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        verbose_name = "Contrato"
+        verbose_name_plural = "Contrato"
+
+    def __str__(self):
+        return f"{self.proveedor} ({self.num_contrato})"
+
+
 
 # ============================== #
 #         MODELO EQUIPO          #
@@ -129,6 +144,7 @@ class Equipo(models.Model):
     costo_unitario = models.CharField(max_length=100, null=True, blank=True)
     usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
     estado = models.ForeignKey(Estado, on_delete=models.SET_NULL, null=True, blank=True)
+    contrato = models.ForeignKey(Contrato, on_delete=models.SET_NULL, null=True, blank=True )
 
     class Meta:
         verbose_name = "Equipo"

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Empresa, Sede, EmpresaSede, Area, Departamento, Usuario, Estado, Equipo, HistorialAsignaciones
+from .models import Empresa, Sede, EmpresaSede, Area, Departamento, Usuario, Estado, Equipo, HistorialAsignaciones,Contrato
 
 class EmpresaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,24 +63,37 @@ class EstadoSerializer(serializers.ModelSerializer):
         model = Estado
         fields = '__all__'
 
-class EquipoSerializer(serializers.ModelSerializer):
-    usuario_name = serializers.CharField(source="usuario.nombre",read_only=True)
-    sede_nombre = serializers.CharField(source="usuario.empresa_sede.sede.nombre")
+class ContratoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contrato
+        fields = '__all__'
 
-    # def get_empresa(self, obj):
-    #     """
-    #     Obtiene la empresa asociada a la sede del usuario.
-    #     Como la relación es Many-to-Many, tomamos la primera empresa de la sede.
-    #     """
-    #     # if obj.usuario and obj.usuario.sede:
-    #     #     empresa_sede = obj.usuario.sede.empresasede_set.first()  # Obtener la primera relación
-    #     #     return empresa_sede.empresa.nombre if empresa_sede else "Sin empresa"
-    #     # return "Sin asignar"  # Si el equipo no tiene usuario asignado
+class EquipoSerializer(serializers.ModelSerializer):
+    usuario_name =  serializers.SerializerMethodField()
+    sede_nombre = serializers.CharField(source="usuario.empresa_sede.sede.nombre", read_only=True)
+    empresa_nombre = serializers.CharField(source="usuario.empresa_sede.empresa.nombre", read_only=True)
 
     class Meta:
         model = Equipo
-        fields = ["serial","modelo","marca","tipo","usuario","usuario","usuario_name","sede_nombre"
-        ]
+        fields = ["serial", "modelo", "marca", "tipo", "usuario", "usuario_name", "sede_nombre","empresa_nombre","contrato"]
+
+    def get_usuario_name(self, obj):
+        """
+        Retorna la empresa asociada a la sede del usuario.
+        Como la relación es Many-to-Many, tomamos la primera empresa asociada a la sede.
+        """
+        if obj.usuario:
+            usuario_name = obj.usuario.nombre
+            return usuario_name
+        else:
+            return "Sin usuario asignado"
+
+
+        # if obj.usuario and obj.usuario.sede:
+        #     empresa_sede = obj.usuario.sede.empresasede_set.first()  # Obtener la primera relación
+        #     return empresa_sede.empresa.nombre if empresa_sede else "Sin empresa"
+        # return "Sin empresa"
+
 
 class HistorialAsignacionesSerializer(serializers.ModelSerializer):
     class Meta:

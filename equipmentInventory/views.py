@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import Empresa, Sede, EmpresaSede, Area, Departamento, Usuario, Estado, Equipo, HistorialAsignaciones
-from .serializers import EmpresaSerializer, SedeSerializer, EmpresaSedeSerializer, AreaSerializer, DepartamentoSerializer, UsuarioSerializer, EstadoSerializer, EquipoSerializer, HistorialAsignacionesSerializer
+from .models import Contrato,Empresa, Sede, EmpresaSede, Area, Departamento, Usuario, Estado, Equipo, HistorialAsignaciones
+from .serializers import ContratoSerializer, EmpresaSerializer, SedeSerializer, EmpresaSedeSerializer, AreaSerializer, DepartamentoSerializer, UsuarioSerializer, EstadoSerializer, EquipoSerializer, HistorialAsignacionesSerializer
 '''
     En Django para manejar los eventos del CRUD usando el DRF(orm de django) se usa el ModelViewset
 
@@ -45,6 +45,10 @@ class EstadoViewSet(viewsets.ModelViewSet):
 class EquipoViewSet(viewsets.ModelViewSet):
     queryset = Equipo.objects.all()
     serializer_class = EquipoSerializer
+
+class ContratoViewSet(viewsets.ModelViewSet):
+    queryset = Contrato.objects.all()
+    serializer_class = ContratoSerializer
 
 class HistorialAsignacionesViewSet(viewsets.ModelViewSet):
     queryset = HistorialAsignaciones.objects.all()
