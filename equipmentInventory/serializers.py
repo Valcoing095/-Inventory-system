@@ -72,10 +72,12 @@ class EquipoSerializer(serializers.ModelSerializer):
     usuario_name =  serializers.SerializerMethodField()
     sede_nombre = serializers.CharField(source="usuario.empresa_sede.sede.nombre", read_only=True)
     empresa_nombre = serializers.CharField(source="usuario.empresa_sede.empresa.nombre", read_only=True)
+    contrato_proveedor = serializers.CharField(source="contrato.proveedor", read_only=True)
+    contrato_numero =  serializers.CharField(source="contrato.num_contrato",read_only=True)
 
     class Meta:
         model = Equipo
-        fields = ["id","serial", "modelo", "marca", "tipo", "usuario", "usuario_name", "sede_nombre","empresa_nombre","contrato"]
+        fields = ["id","serial", "modelo", "marca", "tipo","costo_unitario", "usuario", "usuario_name", "sede_nombre","empresa_nombre","contrato","contrato_proveedor","contrato_numero"]
 
     def get_usuario_name(self, obj):
         """

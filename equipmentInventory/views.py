@@ -57,7 +57,7 @@ class HistorialAsignacionesViewSet(viewsets.ModelViewSet):
 
 # Configuración del servidor LDAP
 LDAP_SERVER = "172.16.2.5"  # Asegúrate de que sea una cadena
-LDAP_USER = "CN=caminos\\adm_yvelascot,CN=Users,DC=caminos,DC=com"  # Asegúrate de que sea una cadena
+LDAP_USER = "CN=adm_yvelascot,CN=Users,DC=caminos,DC=com"  # Asegúrate de que sea una cadena
 LDAP_PASSWORD = "Caminos2021"  # Asegúrate de que sea una cadena
 BASE_DN = "DC=caminos,DC=com"  # Dominio base de búsqueda
 FILTER = "(objectClass=user)"  # Filtro para listar solo usuarios

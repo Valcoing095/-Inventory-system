@@ -53,7 +53,7 @@ class EmpresaSede(models.Model):
 
 class Area(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
-
+    centro_costo = models.CharField(max_length=100,null=True)
     class Meta:
         verbose_name = "Área"
         verbose_name_plural = "Áreas"
