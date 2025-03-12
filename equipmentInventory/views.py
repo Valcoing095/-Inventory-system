@@ -180,7 +180,7 @@ class EquipoViewSet(viewsets.ModelViewSet):
 from ldap3 import Server, Connection, ALL
 
 LDAP_SERVER = "172.16.2.5"
-LDAP_USER = "CN=adm_yvelascot,CN=Users,DC=caminos,DC=com"
+LDAP_USER = "CN=Yeison Alexis Velasco Trejos,ou=Adm_sistemas,DC=caminos,DC=com"
 LDAP_PASSWORD = "Caminos2021"
 BASE_DN = "DC=caminos,DC=com"
 FILTER = "(objectClass=user)"
@@ -196,13 +196,15 @@ def listar_usuarios_ad(request):
         conn = Connection(server, user=LDAP_USER, password=LDAP_PASSWORD, auto_bind=True)
 
         # Buscar usuarios en Active Directory
-        conn.search(BASE_DN, FILTER, attributes=['cn', 'mail'])
+        conn.search(BASE_DN, FILTER, attributes=['cn', 'mail','sAMAccountName'])
 
         # Extraer los resultados
+    
         usuarios = [
             {
                 "nombre": entry.cn.value,
-                "correo": entry.mail.value if hasattr(entry, 'mail') else None
+                "correo": entry.mail.value if hasattr(entry, 'mail') else None,
+                "user AD": entry.sAMAccountName.value
             }
             for entry in conn.entries
         ]
