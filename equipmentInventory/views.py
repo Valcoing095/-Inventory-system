@@ -196,7 +196,7 @@ def listar_usuarios_ad(request):
         conn = Connection(server, user=LDAP_USER, password=LDAP_PASSWORD, auto_bind=True)
 
         # Buscar usuarios en Active Directory
-        conn.search(BASE_DN, FILTER, attributes=['cn', 'mail','sAMAccountName'])
+        conn.search(BASE_DN, FILTER, attributes=['cn', 'mail','sAMAccountName','distinguishedName'])
 
         # Extraer los resultados
     
@@ -204,7 +204,8 @@ def listar_usuarios_ad(request):
             {
                 "nombre": entry.cn.value,
                 "correo": entry.mail.value if hasattr(entry, 'mail') else None,
-                "user AD": entry.sAMAccountName.value
+                "user AD": entry.sAMAccountName.value,
+                "Ubicación usuario": entry.distinguishedName.value
             }
             for entry in conn.entries
         ]
