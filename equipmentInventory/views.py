@@ -94,6 +94,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class EquipoViewSet(viewsets.ModelViewSet):
     queryset = Equipo.objects.all()
     serializer_class = EquipoSerializer
@@ -113,7 +114,7 @@ class EquipoViewSet(viewsets.ModelViewSet):
             print(df)
             # Validar columnas requeridas
             columnas_requeridas = {"serial", "modelo", "tipo", "marca", "procesador", "disco_duro", "ram", 
-                                   "proveedor", "costo_unitario", "usuario", "contrato"}
+                                "costo_unitario", "usuario", "contrato", "nombre"}
             if not columnas_requeridas.issubset(df.columns):
                 return Response({"error": f"El archivo debe contener las siguientes columnas: {', '.join(columnas_requeridas)}"}, 
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -127,9 +128,16 @@ class EquipoViewSet(viewsets.ModelViewSet):
                 try:
                     print(f"🔹 Procesando equipo: {row['serial']} - {row['modelo']}...")
 
-                    usuario = Usuario.objects.get(id=row["usuario"]) if pd.notna(row["usuario"]) else None
-                    
-                    contrato = Contrato.objects.get(num_contrato=row["contrato"]) if pd.notna(row["contrato"]) else None
+                    # Convertir valores NaN en None
+                    row = row.where(pd.notna(row), None)
+
+                    # Obtener contrato si existe, si no, dejar en None
+                    contrato = None
+                    if row["contrato"]:
+                        try:
+                            contrato = Contrato.objects.get(num_contrato=row["contrato"])
+                        except ObjectDoesNotExist:
+                            print(f"⚠️ Contrato {row['contrato']} no encontrado. Se asignará NULL.")
 
                     # 📌 Realizar la transacción individualmente
                     with transaction.atomic():
@@ -141,24 +149,20 @@ class EquipoViewSet(viewsets.ModelViewSet):
                             procesador=row["procesador"],
                             disco_duro=row["disco_duro"],
                             ram=row["ram"],
-                            proveedor=row["proveedor"],
                             costo_unitario=row["costo_unitario"],
-                            usuario=usuario,
-                            contrato=contrato,
+                            usuario=row["usuario"],  # Si usuario es None, Django lo manejará como NULL
+                            contrato=contrato,  # Si no se encuentra, se queda en None (NULL en la BD)
+                            nombre=row["nombre"]
                         )
                         equipo.save()
                         equipos_creados.append(equipo.serial)
                         print(f"✅ Equipo guardado: {equipo.serial} - {equipo.modelo}")
 
-                except ObjectDoesNotExist as e:
-                    error_msg = f"❌ Error con el equipo {row['serial']}: {str(e)}"
-                    errores.append(error_msg)
-                    print(error_msg)
-
                 except Exception as e:
-                    error_msg = f"❌ Error inesperado con el equipo {row['serial']}: {str(e)}"
+                    error_msg = f"❌ Error con el equipo {row.get('serial', 'DESCONOCIDO')}: {str(e)}"
                     errores.append(error_msg)
                     print(error_msg)
+                    continue  # Continuar con el siguiente equipo
 
             print("\n📢 **Carga masiva finalizada**\n")
             print(f"✅ Total equipos creados: {len(equipos_creados)}")
@@ -172,7 +176,6 @@ class EquipoViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(f"❌ Error crítico: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 # ===========================
 # 📌 Configuración LDAP
@@ -196,17 +199,25 @@ def listar_usuarios_ad(request):
         conn = Connection(server, user=LDAP_USER, password=LDAP_PASSWORD, auto_bind=True)
 
         # Buscar usuarios en Active Directory
-        conn.search(BASE_DN, FILTER, attributes=['cn', 'mail','sAMAccountName','distinguishedName'])
+        conn.search(BASE_DN, FILTER, attributes=['cn',
+                                                  'mail',
+                                                  'sAMAccountName',
+                                                  'distinguishedName',
+                                                  'department',
+                                                  'company'
+                                                  ])
 
         # Extraer los resultados
     
         usuarios = [
-            {
-                "nombre": entry.cn.value,
-                "correo": entry.mail.value if hasattr(entry, 'mail') else None,
-                "user AD": entry.sAMAccountName.value,
-                "Ubicación usuario": entry.distinguishedName.value
-            }
+                    {
+                        "nombre": entry.cn.value,
+                        "correo": entry.mail.value if hasattr(entry, 'mail') else None,
+                        "user_AD": entry.sAMAccountName.value,
+                        "Ubicación usuario": entry.distinguishedName.value,
+                        "Departamento":entry.department.value,
+                        "Empresa":entry.company.value
+                    }
             for entry in conn.entries
         ]
 

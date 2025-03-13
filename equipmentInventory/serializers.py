@@ -68,34 +68,58 @@ class ContratoSerializer(serializers.ModelSerializer):
         model = Contrato
         fields = '__all__'
 
+
+
+from ldap3 import Server, Connection, ALL
+
+
+
+
+LDAP_SERVER = "172.16.2.5"
+LDAP_USER = "CN=Yeison Alexis Velasco Trejos,ou=Adm_sistemas,DC=caminos,DC=com"
+LDAP_PASSWORD = "Caminos2021"
+BASE_DN = "DC=caminos,DC=com"
+FILTER = "(objectClass=user)"
 class EquipoSerializer(serializers.ModelSerializer):
-    usuario_name =  serializers.SerializerMethodField()
-    sede_nombre = serializers.CharField(source="usuario.empresa_sede.sede.nombre", read_only=True)
-    empresa_nombre = serializers.CharField(source="usuario.empresa_sede.empresa.nombre", read_only=True)
     contrato_proveedor = serializers.CharField(source="contrato.proveedor", read_only=True)
-    contrato_numero =  serializers.CharField(source="contrato.num_contrato",read_only=True)
+    contrato_numero = serializers.CharField(source="contrato.num_contrato", read_only=True)
+    usuario_info = serializers.SerializerMethodField()  # Se agregará la información del usuario AD
 
     class Meta:
         model = Equipo
-        fields = ["id","serial", "modelo", "marca", "tipo","costo_unitario", "usuario", "usuario_name", "sede_nombre","empresa_nombre","contrato","contrato_proveedor","contrato_numero"]
+        fields = [
+            "id", "serial", "modelo", "marca", "tipo", "costo_unitario",
+            "contrato", "contrato_proveedor", "contrato_numero", "usuario", "nombre", "usuario_info"
+        ]
 
-    def get_usuario_name(self, obj):
-        """
-        Retorna la empresa asociada a la sede del usuario.
-        Como la relación es Many-to-Many, tomamos la primera empresa asociada a la sede.
-        """
-        if obj.usuario:
-            usuario_name = obj.usuario.nombre
-            return usuario_name
-        else:
-            return "Sin usuario asignado"
+    def get_usuario_info(self, obj):
+        """Busca la información del usuario en Active Directory."""
+        if not obj.usuario:
+            return None  # Si no hay usuario, retornar None
 
+        user_ad = obj.usuario  # Se asume que `usuario` almacena el `user_AD`
+        
+        try:
+            server = Server(LDAP_SERVER, get_info=ALL)
+            conn = Connection(server, user=LDAP_USER, password=LDAP_PASSWORD, auto_bind=True)
 
-        # if obj.usuario and obj.usuario.sede:
-        #     empresa_sede = obj.usuario.sede.empresasede_set.first()  # Obtener la primera relación
-        #     return empresa_sede.empresa.nombre if empresa_sede else "Sin empresa"
-        # return "Sin empresa"
+            filtro = f"(sAMAccountName={user_ad})"
+            conn.search(BASE_DN, filtro, attributes=['cn', 'mail', 'sAMAccountName', 'department', 'company'])
 
+            if conn.entries:
+                entry = conn.entries[0]  # Tomamos el primer resultado
+                return {
+                    "nombre": entry.cn.value,
+                    "correo": entry.mail.value if hasattr(entry, 'mail') else None,
+                    "user_AD": entry.sAMAccountName.value,
+                    "departamento": entry.department.value if hasattr(entry, 'department') else None,
+                    "empresa": entry.company.value if hasattr(entry, 'company') else None
+                }
+            
+            return None  # Si no hay coincidencias en AD
+
+        except Exception as e:
+            return {"error": str(e)}
 
 class HistorialAsignacionesSerializer(serializers.ModelSerializer):
     class Meta:

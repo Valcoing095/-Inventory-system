@@ -134,6 +134,7 @@ class Contrato(models.Model):
 
 class Equipo(models.Model):
     serial = models.CharField(max_length=50, unique=True)
+    nombre = models.CharField(max_length=100, null=True, blank=True)
     modelo = models.CharField(max_length=100)
     tipo = models.CharField(max_length=100)
     marca = models.CharField(max_length=100)
@@ -142,17 +143,16 @@ class Equipo(models.Model):
     ram = models.CharField(max_length=100)
     proveedor = models.CharField(max_length=100, null=True, blank=True)
     costo_unitario = models.CharField(max_length=100, null=True, blank=True)
-    usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
+    usuario = models.CharField(max_length = 100, null = True, blank = True)
+    # usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
     estado = models.ForeignKey(Estado, on_delete=models.SET_NULL, null=True, blank=True)
     contrato = models.ForeignKey(Contrato, on_delete=models.SET_NULL, null=True, blank=True )
-
     class Meta:
         verbose_name = "Equipo"
         verbose_name_plural = "Equipos"
 
     def __str__(self):
         return f"{self.modelo} ({self.serial})"
-
 
 # ======================================== #
 #      MODELO HISTORIAL DE ASIGNACIONES    #
