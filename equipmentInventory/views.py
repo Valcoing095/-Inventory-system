@@ -3,7 +3,8 @@ from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 import pandas as pd
 from django.core.exceptions import ObjectDoesNotExist
-
+from django.db.models import Sum, F, FloatField,Count
+from django.db.models.functions import Cast
 from .models import (Contrato, Empresa, Sede, EmpresaSede, Area, Departamento, 
                      Usuario, Estado, Equipo, HistorialAsignaciones)
 from .serializers import (ContratoSerializer, EmpresaSerializer, SedeSerializer, EmpresaSedeSerializer, 
@@ -39,6 +40,39 @@ class DepartamentoViewSet(viewsets.ModelViewSet):
     queryset = Departamento.objects.all()
     serializer_class = DepartamentoSerializer
 
+# Informes
+@api_view(['GET'])
+def equipos_centrocosto(request):
+    """
+    Retorna el costo unitario total de los equipos agrupados por área.
+    """
+    try:
+        # Obtener el total del costo unitario y la cantidad de equipos por área
+        resultado = (
+            Equipo.objects
+            .values('area__nombre', 'area__centro_costo')
+            .annotate(
+                total_costo=Sum('costo_unitario'),
+                total_equipos=Count('id')
+            )
+            .order_by('area__nombre')
+        )
+
+        # Formatear la respuesta
+        respuesta = [
+            {
+                'area': item['area__nombre'],
+                'centro_costo': item['area__centro_costo'],
+                'total_costo': item['total_costo'],
+                'total_equipos': item['total_equipos']
+            }
+            for item in resultado
+        ]
+
+        return Response(respuesta, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # ===========================
 # 📌 CRUD de Usuarios con Carga Masiva

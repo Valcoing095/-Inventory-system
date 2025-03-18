@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (EmpresaViewSet, SedeViewSet, EmpresaSedeViewSet, AreaViewSet, 
                     DepartamentoViewSet, UsuarioViewSet, EquipoViewSet, 
-                    ContratoViewSet, listar_usuarios_ad)
+                    ContratoViewSet, listar_usuarios_ad,equipos_centrocosto)
 
 # 🔹 Router para los ViewSets (CRUD Automático con Django REST Framework)
 router = DefaultRouter()
@@ -22,4 +22,5 @@ urlpatterns = [
     path('api/usuarios/carga_masiva_usuarios/', UsuarioViewSet.as_view({'post': 'carga_masiva_usuarios'}), name='carga_masiva_usuarios'),
     path('api/equipos/carga_masiva_equipos/', EquipoViewSet.as_view({'post': 'carga_masiva_equipos'}), name='carga_masiva_equipos'),
     path('api/usuarios-ad/', listar_usuarios_ad, name='listar_usuarios_ad'),
+    path('api/equipos-por-area/', equipos_centrocosto, name='equipos_centrocosto'),
 ]

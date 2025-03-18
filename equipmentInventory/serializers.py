@@ -82,14 +82,16 @@ BASE_DN = "DC=caminos,DC=com"
 FILTER = "(objectClass=user)"
 class EquipoSerializer(serializers.ModelSerializer):
     contrato_proveedor = serializers.CharField(source="contrato.proveedor", read_only=True)
+    centrocosto = serializers.CharField(source="area.centro_costo", read_only=True)
+    nombre_centrocosto = serializers.CharField(source="area.nombre", read_only=True)
     contrato_numero = serializers.CharField(source="contrato.num_contrato", read_only=True)
     usuario_info = serializers.SerializerMethodField()  # Se agregará la información del usuario AD
 
     class Meta:
         model = Equipo
         fields = [
-            "id", "serial", "modelo", "marca", "tipo", "costo_unitario",
-            "contrato", "contrato_proveedor", "contrato_numero", "usuario", "nombre", "usuario_info"
+            "id", "serial", "modelo", "marca", "tipo", "costo_unitario","ram","procesador","disco_duro",
+            "contrato","area","centrocosto","nombre_centrocosto", "contrato_proveedor", "contrato_numero", "usuario", "nombre", "usuario_info"
         ]
 
     def get_usuario_info(self, obj):
@@ -104,7 +106,7 @@ class EquipoSerializer(serializers.ModelSerializer):
             conn = Connection(server, user=LDAP_USER, password=LDAP_PASSWORD, auto_bind=True)
 
             filtro = f"(sAMAccountName={user_ad})"
-            conn.search(BASE_DN, filtro, attributes=['cn', 'mail', 'sAMAccountName', 'department', 'company'])
+            conn.search(BASE_DN, filtro, attributes=['cn', 'mail', 'sAMAccountName', 'department', 'company','physicalDeliveryOfficeName'])
 
             if conn.entries:
                 entry = conn.entries[0]  # Tomamos el primer resultado
@@ -113,7 +115,8 @@ class EquipoSerializer(serializers.ModelSerializer):
                     "correo": entry.mail.value if hasattr(entry, 'mail') else None,
                     "user_AD": entry.sAMAccountName.value,
                     "departamento": entry.department.value if hasattr(entry, 'department') else None,
-                    "empresa": entry.company.value if hasattr(entry, 'company') else None
+                    "empresa": entry.company.value if hasattr(entry, 'company') else None,
+                    "sede":entry.physicalDeliveryOfficeName.value if hasattr(entry,'physicalDeliveryOfficeName') else None
                 }
             
             return None  # Si no hay coincidencias en AD

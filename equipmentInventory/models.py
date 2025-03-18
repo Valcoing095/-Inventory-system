@@ -117,7 +117,11 @@ class Estado(models.Model):
 # ======================================== #
 class Contrato(models.Model):
     proveedor = models.CharField(max_length=100)
+    estado = models.CharField(max_length=100,null=True, blank=True)
     num_contrato = models.CharField(max_length=100, unique=True)
+    cantidad_equipos = models.IntegerField(null=True, blank=True)
+    fecha_inicio =  models.DateField(null=True,blank=True)
+    fecha_fin = models.DateField(null=True,blank=True)
 
     class Meta:
         verbose_name = "Contrato"
@@ -142,11 +146,12 @@ class Equipo(models.Model):
     disco_duro = models.CharField(max_length=100)
     ram = models.CharField(max_length=100)
     proveedor = models.CharField(max_length=100, null=True, blank=True)
-    costo_unitario = models.CharField(max_length=100, null=True, blank=True)
+    costo_unitario = models.IntegerField(null=True, blank=True)
     usuario = models.CharField(max_length = 100, null = True, blank = True)
     # usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
     estado = models.ForeignKey(Estado, on_delete=models.SET_NULL, null=True, blank=True)
     contrato = models.ForeignKey(Contrato, on_delete=models.SET_NULL, null=True, blank=True )
+    area = models.ForeignKey(Area, on_delete=models.SET_NULL, null=True, blank=True )
     class Meta:
         verbose_name = "Equipo"
         verbose_name_plural = "Equipos"
