@@ -120,6 +120,7 @@ class Contrato(models.Model):
     estado = models.CharField(max_length=100,null=True, blank=True)
     num_contrato = models.CharField(max_length=100, unique=True)
     cantidad_equipos = models.IntegerField(null=True, blank=True)
+    costo_total = models.IntegerField(null=True, blank=True)
     fecha_inicio =  models.DateField(null=True,blank=True)
     fecha_fin = models.DateField(null=True,blank=True)
 

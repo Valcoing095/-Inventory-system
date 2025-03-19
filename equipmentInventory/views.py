@@ -148,7 +148,7 @@ class EquipoViewSet(viewsets.ModelViewSet):
             print(df)
             # Validar columnas requeridas
             columnas_requeridas = {"serial", "modelo", "tipo", "marca", "procesador", "disco_duro", "ram", 
-                                "costo_unitario", "usuario", "contrato", "nombre"}
+                                "costo_unitario", "usuario", "contrato", "nombre","centro_costo"}
             if not columnas_requeridas.issubset(df.columns):
                 return Response({"error": f"El archivo debe contener las siguientes columnas: {', '.join(columnas_requeridas)}"}, 
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -167,11 +167,18 @@ class EquipoViewSet(viewsets.ModelViewSet):
 
                     # Obtener contrato si existe, si no, dejar en None
                     contrato = None
+                    area = None
                     if row["contrato"]:
                         try:
                             contrato = Contrato.objects.get(num_contrato=row["contrato"])
                         except ObjectDoesNotExist:
                             print(f"⚠️ Contrato {row['contrato']} no encontrado. Se asignará NULL.")
+
+                    if row["centro_costo"]:
+                        try:
+                            area = Area.objects.get(id=row["centro_costo"])
+                        except ObjectDoesNotExist:
+                            print(f"⚠️ area {row['centro_costo']} no encontrada. Se asignará NULL.")
 
                     # 📌 Realizar la transacción individualmente
                     with transaction.atomic():
@@ -186,7 +193,8 @@ class EquipoViewSet(viewsets.ModelViewSet):
                             costo_unitario=row["costo_unitario"],
                             usuario=row["usuario"],  # Si usuario es None, Django lo manejará como NULL
                             contrato=contrato,  # Si no se encuentra, se queda en None (NULL en la BD)
-                            nombre=row["nombre"]
+                            nombre=row["nombre"],
+                            area=area
                         )
                         equipo.save()
                         equipos_creados.append(equipo.serial)
